@@ -8,6 +8,8 @@ TagManager:
   - Chest
   - Floor
   - Goal
+  - LevelPanel
+  - LevelButton
   layers:
   - Default
   - TransparentFX

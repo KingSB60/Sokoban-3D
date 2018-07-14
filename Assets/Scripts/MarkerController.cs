@@ -10,10 +10,10 @@ public class MarkerController : MonoBehaviour
     private Vector3 destination;
 
     // Use this for initialization
-    void Start()
+    void Awake()
     {
         movement = Vector3.up * 0.5f;
-        destination = transform.position + movement;
+        destination = transform.localPosition + movement;
 
         //Debug.Log(indicatorMovement);
     }
@@ -21,11 +21,14 @@ public class MarkerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = Vector3.MoveTowards(transform.position, destination, speed * Time.deltaTime);
-        if (transform.position == destination)
+        if (gameObject.activeInHierarchy)
         {
-            movement = -movement;
-            destination = transform.position + movement;
+            transform.localPosition = Vector3.MoveTowards(transform.localPosition, destination, speed * Time.deltaTime);
+            if (transform.localPosition == destination)
+            {
+                movement = -movement;
+                destination = transform.localPosition + movement;
+            }
         }
     }
 }

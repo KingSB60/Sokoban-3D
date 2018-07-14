@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,32 +9,33 @@ public class PlayerController : MonoBehaviour {
 
     public Vector3 moveDirection, oldPosition;
     public float speed;
-    public Text movesText, pushsText, timeText;
-    public int chestsOnGoal;
+    //public Text movesText, pushsText, timeText;
+    public TextMeshProUGUI movesText, pushsText, timeText;
+    //public int chestsOnGoal;
 
     private bool moving;
     private Vector3 moveDestination;
     private float axisX, axisZ;
-    private DateTime startTime;
+    //private DateTime startTime;
 
-    private int moveCount;
-    private int pushCount;
+    //private int moveCount;
+    //private int pushCount;
 
     public int MoveCount
     {
-        get { return moveCount; }
+        get { return GameManager.Instance.Levels.CurrentLevel.MoveCount; }
         set
         {
-            moveCount = value;
+            GameManager.Instance.Levels.CurrentLevel.MoveCount = value;
             SetMoveText();
         }
     }
     public int PushCount
     {
-        get { return pushCount; }
+        get { return GameManager.Instance.Levels.CurrentLevel.PushCount; }
         set
         {
-            pushCount = value;
+            GameManager.Instance.Levels.CurrentLevel.PushCount = value;
             SetPushText();
         }
     }
@@ -48,12 +50,18 @@ public class PlayerController : MonoBehaviour {
         moveDirection = Vector3.zero;
         MoveCount = 0;
         PushCount = 0;
-        startTime = DateTime.MinValue;
+        //startTime = DateTime.MinValue;
+        GameManager.Instance.Levels.CurrentLevel.StartTime = DateTime.Now;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if ((GameManager.Instance.Levels.CurrentLevel.LevelCompleted ||
+             GameManager.Instance.Levels.CurrentLevel.LevelPaused) &&
+            !moving)
+            return;
+
         float axisX = Input.GetAxis("Horizontal");
         float axisZ = Input.GetAxis("Vertical");
 
@@ -90,8 +98,8 @@ public class PlayerController : MonoBehaviour {
             if (!moveDirection.Equals(Vector3.zero))
             {
                 MoveCount++;
-                if (startTime == DateTime.MinValue)
-                    startTime = DateTime.Now;
+                //if (startTime == DateTime.MinValue)
+                //    startTime = DateTime.Now;
             }
 
             moveDestination = transform.position + moveDirection;
@@ -127,22 +135,27 @@ public class PlayerController : MonoBehaviour {
 
     private void SetMoveText()
     {
-        movesText.text = "Züge: " + moveCount.ToString();
+        movesText.text = "Zuege: " + GameManager.Instance.Levels.CurrentLevel.MoveCount.ToString();
     }
     private void SetPushText()
     {
-        pushsText.text = "Schübe: " + pushCount.ToString();
+        pushsText.text = "Schuebe: " + GameManager.Instance.Levels.CurrentLevel.PushCount.ToString();
     }
     private void SetTimeText()
     {
-        string time_txt = String.Empty;
-        if (startTime == DateTime.MinValue)
-            time_txt = "00:00,0";
-        else
+        string time_txt = "00:00,0";
+
+        if(!GameManager.Instance.Levels.CurrentLevel.LevelCompleted)
         {
-            TimeSpan time = DateTime.Now - startTime;
-            time_txt = String.Format("{0:D2}:{1:D2},{2}", time.Minutes, time.Seconds, time.Milliseconds / 100);
+            GameManager.Instance.Levels.CurrentLevel.EndTime = DateTime.Now;
         }
+
+        if(GameManager.Instance.Levels.CurrentLevel.StartTime!=DateTime.MinValue)
+            time_txt = String.Format("{0:D2}:{1:D2},{2}",
+                                      GameManager.Instance.Levels.CurrentLevel.LevelTime.Minutes,
+                                      GameManager.Instance.Levels.CurrentLevel.LevelTime.Seconds,
+                                      GameManager.Instance.Levels.CurrentLevel.LevelTime.Milliseconds / 100);
+
         timeText.text = "Zeit: " + time_txt;
     }
 }

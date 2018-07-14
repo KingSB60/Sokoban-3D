@@ -11,17 +11,16 @@ public class MinimapCameraController : MonoBehaviour {
 	void Start () {
 		
 	}
-	
-	// Update is called once per frame
-	void Update ()
+
+    // Update is called once per frame
+    void Update()
     {
         var scrolled = Input.GetAxis("Mouse ScrollWheel");
         var shift = Input.GetKey(KeyCode.LeftShift);
         int step = shift ? fastZoom : normalZoom;
         if (scrolled > 0)
-            GetComponent<Camera>().fieldOfView+=step;
+            GetComponent<Camera>().orthographicSize += step;
         else if (scrolled < 0)
-            GetComponent<Camera>().fieldOfView-=step;
-
+            GetComponent<Camera>().orthographicSize -= step;
     }
 }

@@ -8,27 +8,45 @@ public class ChestController : MonoBehaviour {
     //public Material normalMaterial;
     //public Material onGoalMaterial;
     public GameObject OnGoalIndicator;
+    public GameObject levelCompleted;
 
     private float speed;
     private Vector3 movingDestination, lastPosition;
     private bool moving;
-    private bool destinationIsGoal, destinationWasGoal;
+    private bool _destinationIsGoal;//, destinationWasGoal;
     private PlayerController playerScript;
-    private GameObject indicatorInstance;
+    //private GameObject indicatorInstance;
+
+    private bool DestinationIsGoal
+    {
+        get { return _destinationIsGoal; }
+        set
+        {
+            _destinationIsGoal = value;
+            transform.Find("OnGoalMarker").gameObject.SetActive(value);
+        }
+    }
 
     // Use this for initialization
     void Start ()
     {
         moving = false;
-        destinationIsGoal = false;
+        DestinationIsGoal = false;
+        var canvs = Resources.FindObjectsOfTypeAll<Canvas>();
+        foreach (var canvas in canvs)
+        {
+            if(canvas.gameObject.name== "CompletedCanvas")
+            {
+                levelCompleted = canvas.gameObject;
+                break;
+            }
+        }
 	}
 
     // Update is called once per frame
     void Update()
     {
-        if (indicatorInstance!= null)
-        {
-        }
+
     }
 
     void LateUpdate ()
@@ -37,28 +55,6 @@ public class ChestController : MonoBehaviour {
         {
             transform.position = Vector3.MoveTowards(transform.position, movingDestination, speed * Time.deltaTime);
             moving = !transform.position.Equals(movingDestination);
-            if (!moving)
-                SetOnGoal();
-        }
-    }
-
-    private void SetOnGoal()
-    {
-        //Debug.Log("destinationIsGoal = " + destinationIsGoal.ToString());
-
-        //GetComponent<MeshRenderer>().material = destinationIsGoal ? onGoalMaterial : normalMaterial;
-        if (destinationIsGoal)
-        {
-            var x = transform.position.x;
-            var y = OnGoalIndicator.transform.position.y;
-            var z = transform.position.z;
-            var pos = new Vector3(x, y, z);
-            indicatorInstance = Instantiate(OnGoalIndicator, pos, Quaternion.identity);
-        }
-        else if (indicatorInstance != null)
-        {
-            Destroy(indicatorInstance);
-            indicatorInstance = null;
         }
     }
 
@@ -91,8 +87,11 @@ public class ChestController : MonoBehaviour {
                 break;
             case "Wall":
             case "Chest":
-                movingDestination = lastPosition;
-                playerScript.MoveBack(true);
+                if (moving)
+                {
+                    movingDestination = lastPosition;
+                    playerScript.MoveBack(true);
+                }
                 break;
         }
     }
@@ -101,15 +100,26 @@ public class ChestController : MonoBehaviour {
     {
         //Debug.Log("SetIsGoal --> " + value.ToString());
 
-        if (destinationWasGoal != value)
+        if (DestinationIsGoal != value)
         {
             if (value)
-                playerScript.chestsOnGoal++;
+            {
+                GameManager.Instance.Levels.CurrentLevel.NumberOfChestsOnGoal++;
+                if (GameManager.Instance.Levels.CurrentLevel.LevelCompleted)
+                {
+                    Debug.Log("Level Completed!!!");
+                    GameManager.Instance.SaveToHighscores();
+                    GameManager.Instance.GameSettings.LastEnabledLevel = GameManager.Instance.Levels.NextLevelIdx;
+                    levelCompleted.SetActive(true);
+                }
+            }
             else
-                playerScript.chestsOnGoal--;
+            {
+                GameManager.Instance.Levels.CurrentLevel.NumberOfChestsOnGoal--;
+            }
         }
 
-        destinationWasGoal = destinationIsGoal;
-        destinationIsGoal = value;
+        //destinationWasGoal = DestinationIsGoal;
+        DestinationIsGoal = value;
     }
 }
