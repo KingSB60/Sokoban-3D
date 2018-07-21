@@ -7,12 +7,12 @@ using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour {
 
+    public static LevelManager Instance;
+
     public Transform Walls;
     public Transform Floors;
     public Transform Chests;
     public TextMeshProUGUI levelText;
-    public GameObject levelFinished;
-    public GameObject levelPaused;
 
     public GameObject Player;
     public GameObject WallTemplate;
@@ -20,16 +20,21 @@ public class LevelManager : MonoBehaviour {
     public GameObject GoalTemplate;
     public GameObject ChestTemplate;
 
-    //private Level level;
+    private GameManager gameManager;
+    private GameObject levelFinished;
+    private GameObject levelPaused;
+    private GameObject levelSelector;
 
     void Awake()
     {
-        ClearLevel();
-        //level = GameManager.Instance.Levels.CurrentLevel;
-        BuildLevel();
+        gameManager = GameManager.Instance;
+        Instance = this;
+        //ClearLevel();
+        ////level = GameManager.Instance.Levels.CurrentLevel;
+        //BuildLevel();
     }
 
-    private void ClearLevel()
+    public void ClearLevel()
     {
         // remove all Wall elements
         for (int i = 0; i < Walls.childCount; i++)
@@ -43,13 +48,13 @@ public class LevelManager : MonoBehaviour {
         for (int i = 0; i < Chests.childCount; i++)
             Destroy(Chests.GetChild(i).gameObject);
     }
-    private void BuildLevel()
+    public void BuildLevel()
     {
-        for (int z = 0; z < GameManager.Instance.Levels.CurrentLevel.Height; z++)
+        for (int z = 0; z < gameManager.CurrentLevel.Height; z++)
         {
-            for (int x = 0; x < GameManager.Instance.Levels.CurrentLevel.Width; x++)
+            for (int x = 0; x < gameManager.CurrentLevel.Width; x++)
             {
-                var element = GameManager.Instance.Levels.CurrentLevel[z][x];
+                var element = gameManager.CurrentLevel[z][x];
                 switch (element)
                 {
                     case LevelElement.Wall:
@@ -81,34 +86,40 @@ public class LevelManager : MonoBehaviour {
             }
         }
     }
+    public void SetLevelText()
+    {
+        levelText.text = gameManager.CurrentLevel.Id;
+    }
+
     private void SetPlayer(int z, int x)
     {
-        Player.transform.position= new Vector3((float)x, Player.transform.position.y, (float)(GameManager.Instance.Levels.CurrentLevel.Height - z));
+        Player.transform.position= new Vector3((float)x, Player.transform.position.y, (float)(gameManager.CurrentLevel.Height - z));
     }
     private void CreateLevelObject(GameObject template, Transform parent, int z, int x)
     {
         Vector3 clonePosition = template.transform.position;
-        clonePosition = new Vector3((float)x, template.transform.position.y, (float)(GameManager.Instance.Levels.CurrentLevel.Height - z));
+        clonePosition = new Vector3((float)x, template.transform.position.y, (float)(gameManager.CurrentLevel.Height - z));
         GameObject clone = Instantiate(template, clonePosition, Quaternion.identity, parent);
     }
 
     void Start()
     {
         SetLevelText();
-        var canvs = Resources.FindObjectsOfTypeAll<Canvas>();
-        foreach (var canvas in canvs)
-        {
-            if (canvas.gameObject.name == "CompletedCanvas")
-            {
-                levelFinished = canvas.gameObject;
-                break;
-            }
-        }
-    }
+        //var canvs = Resources.FindObjectsOfTypeAll<Canvas>();
+        levelFinished = Utils.FindIncludingInactive("CompletedCanvas");
+        levelPaused = Utils.FindIncludingInactive("PausedCanvas");
+        levelSelector = Utils.FindIncludingInactive("LevelSelectorCanvas");
 
-    private void SetLevelText()
-    {
-        levelText.text = String.Format("Level {0}", GameManager.Instance.Levels.CurrentLevel.Id);
+        //DontDestroyOnLoad(levelSelector);
+
+        //foreach (var canvas in canvs)
+        //{
+        //    if (canvas.gameObject.name == "CompletedCanvas")
+        //    {
+        //        levelFinished = canvas.gameObject;
+        //        break;
+        //    }
+        //}
     }
 
     private void Update()
@@ -122,9 +133,9 @@ public class LevelManager : MonoBehaviour {
         //    Debug.Log("esc_pressed!");
 
         if ((p_pressed || esc_pressed) && 
-            !GameManager.Instance.Levels.CurrentLevel.LevelCompleted)
+            !gameManager.CurrentLevel.LevelCompleted)
         {
-            if (GameManager.Instance.Levels.CurrentLevel.LevelPaused)
+            if (gameManager.CurrentLevel.LevelPaused)
                 ContinueGame();
             else
                 PauseGame();
@@ -133,27 +144,30 @@ public class LevelManager : MonoBehaviour {
 
     public void GoNextLevel()
     {
-        if (GameManager.Instance.Levels.LastLevelReached)
+        if (gameManager.LastLevelReached)
         {
             AllLevelsFinished();
         }
         else
         {
-            GameManager.Instance.Levels.NextLevel();
-            GameManager.Instance.Levels.CurrentLevel.MoveCount = 0;
-            GameManager.Instance.Levels.CurrentLevel.PushCount = 0;
-            GameManager.Instance.Levels.CurrentLevel.History = String.Empty;
+            gameManager.NextLevel();
+            gameManager.CurrentLevel.MoveCount = 0;
+            gameManager.CurrentLevel.PushCount = 0;
+            gameManager.CurrentLevel.History = String.Empty;
             ClearLevel();
             BuildLevel();
             SetLevelText();
 
-            levelFinished.SetActive(false);
-            GameManager.Instance.Levels.CurrentLevel.StartTime = DateTime.Now;
+            levelFinished.GetComponent<Canvas>().enabled = false;
+            gameManager.CurrentLevel.StartTime = DateTime.Now;
         }
     }
     public void GoToLevelSelect()
     {
-        SceneManager.LoadScene("LevelSelector");
+        //SceneManager.LoadScene("LevelSelector");
+        Pause(false);
+        levelFinished.GetComponent<Canvas>().enabled = false;
+        levelSelector.GetComponent<Canvas>().enabled = true;
     }
     public void AllLevelsFinished()
     {
@@ -161,6 +175,7 @@ public class LevelManager : MonoBehaviour {
     }
     public void GoToMainMenu()
     {
+        Pause(false);
         SceneManager.LoadScene("GameMenu");
     }
     public void PauseGame()
@@ -173,13 +188,40 @@ public class LevelManager : MonoBehaviour {
     }
     public void RestartLevel()
     {
-        GameManager.Instance.Levels.CurrentLevel.LevelPaused = false;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        gameManager.CurrentLevel.LevelPaused = false;
+
+        // TODO: schneller wäre u.U. nur verücken von Kisten und Player auf Ausgangsposition
+        //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
+        int boxCount = 0;
+        for (int z = 0; z < gameManager.CurrentLevel.Height; z++)
+            for (int x = 0; x < gameManager.CurrentLevel.Width; x++)
+            {
+                switch (gameManager.CurrentLevel[z][x])
+                {
+                    case LevelElement.Player:
+                    case LevelElement.PlayerOnGoal:
+                        SetPlayer(z, x);
+                        break;
+                    case LevelElement.Box:
+                        var chest = Chests.transform.GetChild(boxCount);
+                        chest.position = new Vector3((float)(x), chest.position.y, (float)(gameManager.CurrentLevel.Height - z));
+                        boxCount++;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        Pause(false);
+        gameManager.CurrentLevel.MoveCount = 0;
+        gameManager.CurrentLevel.PushCount = 0;
+        gameManager.CurrentLevel.StartTime = DateTime.Now;
     }
 
     private void Pause(bool value)
     {
-        GameManager.Instance.Levels.CurrentLevel.LevelPaused = value;
-        levelPaused.SetActive(value);
+        gameManager.CurrentLevel.LevelPaused = value;
+        levelPaused.GetComponent<Canvas>().enabled = value;
     }
 }

@@ -8,12 +8,12 @@ public class GameMenu : MonoBehaviour {
     public void RestartGame()
     {
         GameManager.Instance.GameSettings.LastEnabledLevel = 0;
-        SceneManager.LoadScene("LevelSelector");
+        SceneManager.LoadScene("LevelScene");
     }
 
     public void ContinueGame()
     {
-        SceneManager.LoadScene("LevelSelector");
+        SceneManager.LoadScene("LevelScene");
     }
 
     public void ShowSettings()

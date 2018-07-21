@@ -55,6 +55,11 @@ public class GameManager : INotifyPropertyChanged
         OnPropertyChanged("Settings." + e.PropertyName);
     }
 
+    internal int GetLevelIndex(Level level)
+    {
+        return Levels.GetLevelIndex(level);
+    }
+
     public static GameManager Instance
     {
         get
@@ -75,6 +80,16 @@ public class GameManager : INotifyPropertyChanged
             OnPropertyChanged("Levels");
         }
     }
+    public Level CurrentLevel
+    {
+        get { return Levels.CurrentLevel; }
+    }
+    public string CurrentLevelId
+    {
+        get { return Levels.CurrentLevelId; }
+        set { Levels.CurrentLevelId = value; }
+    }
+    public int LevelCount { get { return Levels.Count; } }
     private Settings _GameSettings;
     public Settings GameSettings
     {
@@ -86,6 +101,10 @@ public class GameManager : INotifyPropertyChanged
         }
     }
 
+    public bool LastLevelReached { get { return Levels.LastLevelReached; } }
+
+    public object LevelsTitle { get { return Levels.Title; } }
+
     public Level GetLevelById(string id)
     {
         return Levels.GetLevelById(id);
@@ -93,6 +112,15 @@ public class GameManager : INotifyPropertyChanged
 
     internal void SaveToHighscores()
     {
-        //TODO: Save current levels re sults To Highscorelist!
+        //TODO: Save current levels results To Highscorelist!
+    }
+    public void SetNextLevel()
+    {
+        GameSettings.LastEnabledLevel = Levels.GetLevelIndex(Levels.NextLevelId);
+    }
+
+    internal void NextLevel()
+    {
+        Levels.NextLevel();
     }
 }

@@ -5,10 +5,17 @@ using TMPro;
 
 public class LevelName : MonoBehaviour {
 
-	// Use this for initialization
-	void Start ()
+    private GameManager gameManager;
+
+    private void Awake()
     {
-        GetComponent<TextMeshProUGUI>().text = string.Format("- {0} -", GameManager.Instance.Levels.Title);
+        gameManager = GameManager.Instance;
+    }
+
+    // Use this for initialization
+    void Start ()
+    {
+        GetComponent<TextMeshProUGUI>().text = string.Format("- {0} -", gameManager.LevelsTitle);
 	}
 	
 	// Update is called once per frame

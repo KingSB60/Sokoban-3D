@@ -8,23 +8,19 @@ public class LevelButtonPanel : MonoBehaviour {
 
     public GameObject levelButtonTemplate;
     public Scrollbar selectorScrrollbar;
+    public static bool isInitialized;
 
-	// Use this for initialization
-	void Awake ()
-    {
-        InitSelector();
-	}
+    private GameManager gameManager;
 
-    void Start()
+    // Use this for initialization
+    void Awake()
     {
-        //selectorScrrollbar.value = 0;
+        gameManager = GameManager.Instance;
+        //if (!isInitialized)
+            InitSelector();
+
+        //DontDestroyOnLoad(this);
     }
-
-    // Update is called once per frame
-    void Update ()
-    {
-		
-	}
 
     public void BackToMainMenu()
     {
@@ -41,19 +37,31 @@ public class LevelButtonPanel : MonoBehaviour {
                 Destroy(child);
         }
 
-        for (int idx = 0; idx < GameManager.Instance.Levels.Count; idx++)
+        for (int idx = 0; idx < gameManager.LevelCount; idx++)
         {
-            var level = GameManager.Instance.Levels[idx];
+            var level = gameManager.Levels[idx];
+            bool isEnabled = gameManager.GetLevelIndex(level) <= gameManager.GameSettings.LastEnabledLevel;
+
             if (level.LevelButton == null)
             {
-                bool isEnabled = GameManager.Instance.Levels.GetLevelIndex(level) <= GameManager.Instance.GameSettings.LastEnabledLevel;
-
-                level.LevelButton = Instantiate(levelButtonTemplate);
-                level.LevelButton.GetComponent<RectTransform>().localScale = Vector3.one;
-                level.LevelButton.GetComponent<LevelButton>().InitButton(level, isEnabled);
-                DontDestroyOnLoad(level.LevelButton);
+                if (level.LevelButton == null)
+                {
+                    level.LevelButton = Instantiate(levelButtonTemplate);
+                    level.LevelButton.GetComponent<RectTransform>().localScale = Vector3.one;
+                    level.LevelButton.GetComponent<LevelButton>().InitButton(level, isEnabled);
+                    //DontDestroyOnLoad(level.LevelButton);
+                }
             }
-            level.LevelButton.transform.SetParent(transform, true);
+            else
+            {
+                level.LevelButton.transform.Find("LockPanel").gameObject.SetActive(!isEnabled);
+                level.LevelButton.GetComponent<Button>().interactable = isEnabled;
+            }
+            //if (level.LevelButton.transform.parent != null)
+            //    level.LevelButton.transform.SetParent(null, true);
+            level.LevelButton.transform.SetParent(transform, false);
         }
+
+        isInitialized = true;
     }
 }

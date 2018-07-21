@@ -19,13 +19,12 @@ public class SokobanLevels:IEnumerable<Level>
 
     public int NextLevelIdx { get { return GetLevelIndex(NextLevelId); } }
 
-    public SokobanLevels()
-    {
-        Title = String.Empty;
-        Description = String.Empty;
-        Collection = new LevelCollection();
-    }
     public SokobanLevels(string path)
+    {
+        LoadSokobanLevels(path);
+    }
+
+    private void LoadSokobanLevels(string path)
     {
         XmlDocument doc = new XmlDocument();
         doc.Load(path);
@@ -47,6 +46,9 @@ public class SokobanLevels:IEnumerable<Level>
                     break;
             }
         }
+
+        if (Collection.Count > 0)
+            CurrentLevelId = Collection[0].Id;
     }
 
     internal int GetLevelIndex(string levelId)

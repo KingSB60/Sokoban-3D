@@ -87,6 +87,6 @@ public class PreviewCreator : MonoBehaviour
         float vScale = gridHeight / elementHeight;
 
         float scale = Math.Min(vScale, hScale);
-        element.GetComponent<RectTransform>().localScale = new Vector3(scale, scale);
+        element.GetComponent<RectTransform>().localScale = new Vector3(scale, scale, 1);
     }
 }

@@ -244,6 +244,8 @@ MonoBehaviour:
   OnGoalIndicator: {fileID: 1835145438025376, guid: 3bb22fd132d420e43b5ff9ecde124efb,
     type: 2}
   levelCompleted: {fileID: 0}
+  defaultMaterial: {fileID: 2100000, guid: ce7c9eb2eb8ac9744b76cb90aed437e4, type: 2}
+  glowMaterial: {fileID: 2100000, guid: c3dd681428e2eaa4da467ca923939c22, type: 2}
 --- !u!114 &114535194825087822
 MonoBehaviour:
   m_ObjectHideFlags: 1

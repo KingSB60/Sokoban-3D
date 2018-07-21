@@ -9,6 +9,8 @@ public class ChestController : MonoBehaviour {
     //public Material onGoalMaterial;
     public GameObject OnGoalIndicator;
     public GameObject levelCompleted;
+    public Material defaultMaterial;
+    public Material glowMaterial;
 
     private float speed;
     private Vector3 movingDestination, lastPosition;
@@ -16,6 +18,7 @@ public class ChestController : MonoBehaviour {
     private bool _destinationIsGoal;//, destinationWasGoal;
     private PlayerController playerScript;
     //private GameObject indicatorInstance;
+    private GameManager gameManager;
 
     private bool DestinationIsGoal
     {
@@ -23,8 +26,17 @@ public class ChestController : MonoBehaviour {
         set
         {
             _destinationIsGoal = value;
-            transform.Find("OnGoalMarker").gameObject.SetActive(value);
+            //transform.Find("OnGoalMarker").gameObject.SetActive(value);
+
+            GameObject chest = transform.Find("large_crate").gameObject;
+            Renderer rend = chest.GetComponent<Renderer>();
+            rend.material = value ? glowMaterial : defaultMaterial;
         }
+    }
+
+    private void Awake()
+    {
+        gameManager = GameManager.Instance;
     }
 
     // Use this for initialization
@@ -32,15 +44,8 @@ public class ChestController : MonoBehaviour {
     {
         moving = false;
         DestinationIsGoal = false;
-        var canvs = Resources.FindObjectsOfTypeAll<Canvas>();
-        foreach (var canvas in canvs)
-        {
-            if(canvas.gameObject.name== "CompletedCanvas")
-            {
-                levelCompleted = canvas.gameObject;
-                break;
-            }
-        }
+        levelCompleted = Utils.FindIncludingInactive("CompletedCanvas");
+
 	}
 
     // Update is called once per frame
@@ -104,18 +109,18 @@ public class ChestController : MonoBehaviour {
         {
             if (value)
             {
-                GameManager.Instance.Levels.CurrentLevel.NumberOfChestsOnGoal++;
-                if (GameManager.Instance.Levels.CurrentLevel.LevelCompleted)
+                gameManager.CurrentLevel.NumberOfChestsOnGoal++;
+                if (gameManager.CurrentLevel.LevelCompleted)
                 {
                     Debug.Log("Level Completed!!!");
-                    GameManager.Instance.SaveToHighscores();
-                    GameManager.Instance.GameSettings.LastEnabledLevel = GameManager.Instance.Levels.NextLevelIdx;
-                    levelCompleted.SetActive(true);
+                    gameManager.SaveToHighscores();
+                    gameManager.SetNextLevel();
+                    levelCompleted.GetComponent<Canvas>().enabled = true;
                 }
             }
             else
             {
-                GameManager.Instance.Levels.CurrentLevel.NumberOfChestsOnGoal--;
+                gameManager.CurrentLevel.NumberOfChestsOnGoal--;
             }
         }
 

@@ -16,26 +16,28 @@ public class PlayerController : MonoBehaviour {
     private bool moving;
     private Vector3 moveDestination;
     private float axisX, axisZ;
-    //private DateTime startTime;
+    private GameManager gameManager;
 
-    //private int moveCount;
-    //private int pushCount;
+    private void Awake()
+    {
+        gameManager = GameManager.Instance;
+    }
 
     public int MoveCount
     {
-        get { return GameManager.Instance.Levels.CurrentLevel.MoveCount; }
+        get { return gameManager.CurrentLevel.MoveCount; }
         set
         {
-            GameManager.Instance.Levels.CurrentLevel.MoveCount = value;
+            gameManager.CurrentLevel.MoveCount = value;
             SetMoveText();
         }
     }
     public int PushCount
     {
-        get { return GameManager.Instance.Levels.CurrentLevel.PushCount; }
+        get { return gameManager.CurrentLevel.PushCount; }
         set
         {
-            GameManager.Instance.Levels.CurrentLevel.PushCount = value;
+            gameManager.CurrentLevel.PushCount = value;
             SetPushText();
         }
     }
@@ -51,14 +53,14 @@ public class PlayerController : MonoBehaviour {
         MoveCount = 0;
         PushCount = 0;
         //startTime = DateTime.MinValue;
-        GameManager.Instance.Levels.CurrentLevel.StartTime = DateTime.Now;
+        gameManager.CurrentLevel.StartTime = DateTime.Now;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if ((GameManager.Instance.Levels.CurrentLevel.LevelCompleted ||
-             GameManager.Instance.Levels.CurrentLevel.LevelPaused) &&
+        if ((gameManager.CurrentLevel.LevelCompleted ||
+             gameManager.CurrentLevel.LevelPaused) &&
             !moving)
             return;
 
@@ -135,26 +137,27 @@ public class PlayerController : MonoBehaviour {
 
     private void SetMoveText()
     {
-        movesText.text = "Zuege: " + GameManager.Instance.Levels.CurrentLevel.MoveCount.ToString();
+        movesText.text = "Zuege: " + gameManager.CurrentLevel.MoveCount.ToString();
     }
     private void SetPushText()
     {
-        pushsText.text = "Schuebe: " + GameManager.Instance.Levels.CurrentLevel.PushCount.ToString();
+        pushsText.text = "Schuebe: " + gameManager.CurrentLevel.PushCount.ToString();
     }
     private void SetTimeText()
     {
         string time_txt = "00:00,0";
 
-        if(!GameManager.Instance.Levels.CurrentLevel.LevelCompleted)
+        if(!gameManager.CurrentLevel.LevelCompleted)
         {
-            GameManager.Instance.Levels.CurrentLevel.EndTime = DateTime.Now;
+            gameManager.CurrentLevel.EndTime = DateTime.Now;
         }
 
-        if(GameManager.Instance.Levels.CurrentLevel.StartTime!=DateTime.MinValue)
-            time_txt = String.Format("{0:D2}:{1:D2},{2}",
-                                      GameManager.Instance.Levels.CurrentLevel.LevelTime.Minutes,
-                                      GameManager.Instance.Levels.CurrentLevel.LevelTime.Seconds,
-                                      GameManager.Instance.Levels.CurrentLevel.LevelTime.Milliseconds / 100);
+        if(gameManager.CurrentLevel.StartTime!=DateTime.MinValue)
+            time_txt = String.Format("{0:D2}:{1:D2}:{2:D2},{3}",
+                                      gameManager.CurrentLevel.LevelTime.Hours,
+                                      gameManager.CurrentLevel.LevelTime.Minutes,
+                                      gameManager.CurrentLevel.LevelTime.Seconds,
+                                      gameManager.CurrentLevel.LevelTime.Milliseconds / 100);
 
         timeText.text = "Zeit: " + time_txt;
     }
