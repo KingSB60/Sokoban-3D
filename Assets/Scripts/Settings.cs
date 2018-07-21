@@ -143,9 +143,12 @@ public class Settings : /*MonoBehaviour,*/ INotifyPropertyChanged
         {
             if (PlayerPrefs.GetInt(lastEnabled_Key) != value)
             {
-                PlayerPrefs.SetInt(lastEnabled_Key, value);
-                PlayerPrefs.Save();
-                OnPropertyChanged("LastEnabledLevel");
+                if (PlayerPrefs.GetInt(lastEnabled_Key) < value)
+                {
+                    PlayerPrefs.SetInt(lastEnabled_Key, value);
+                    PlayerPrefs.Save();
+                    OnPropertyChanged("LastEnabledLevel");
+                }
             }
         }
     }

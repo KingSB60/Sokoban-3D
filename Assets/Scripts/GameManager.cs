@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class GameManager : INotifyPropertyChanged
 {
-    private static GameManager instance;
+    private static GameManager _Instance;
 
     public event PropertyChangedEventHandler PropertyChanged;
     private void OnPropertyChanged(string propertyName)
@@ -21,7 +21,7 @@ public class GameManager : INotifyPropertyChanged
 
     private GameManager()
     {
-        GameSettings = new Settings();
+        _GameSettings = new Settings();
         LoadLevels();
     }
 
@@ -64,9 +64,9 @@ public class GameManager : INotifyPropertyChanged
     {
         get
         {
-            if (instance == null)
-                instance = new GameManager();
-            return instance;
+            if (_Instance == null)
+                _Instance = new GameManager();
+            return _Instance;
         }
     }
 

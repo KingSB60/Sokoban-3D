@@ -21,7 +21,7 @@ public class Laser : MonoBehaviour {
         {
             if (hit.collider)
             {
-                lr.SetPosition(1, hit.collider.transform.position);
+                lr.SetPosition(1, hit.point + hit.normal);
             }
         }
         else

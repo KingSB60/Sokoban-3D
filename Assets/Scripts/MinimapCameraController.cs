@@ -19,8 +19,10 @@ public class MinimapCameraController : MonoBehaviour {
         var shift = Input.GetKey(KeyCode.LeftShift);
         int step = shift ? fastZoom : normalZoom;
         if (scrolled > 0)
-            GetComponent<Camera>().orthographicSize += step;
+            //GetComponent<Camera>().orthographicSize -= step;
+            GetComponent<Camera>().fieldOfView -= step;
         else if (scrolled < 0)
-            GetComponent<Camera>().orthographicSize -= step;
+            //GetComponent<Camera>().orthographicSize += step;
+            GetComponent<Camera>().fieldOfView += step;
     }
 }

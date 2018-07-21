@@ -190,9 +190,6 @@ public class LevelManager : MonoBehaviour {
     {
         gameManager.CurrentLevel.LevelPaused = false;
 
-        // TODO: schneller wäre u.U. nur verücken von Kisten und Player auf Ausgangsposition
-        //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-
         int boxCount = 0;
         for (int z = 0; z < gameManager.CurrentLevel.Height; z++)
             for (int x = 0; x < gameManager.CurrentLevel.Width; x++)
