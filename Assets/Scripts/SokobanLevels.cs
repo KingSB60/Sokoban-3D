@@ -317,6 +317,22 @@ public class Level : IEnumerable<LevelLine>
     {
         return Lines.GetEnumerator();
     }
+
+    internal LevelElement[] GetNeighbors(int h, int w)
+    {
+        List<LevelElement> result = new List<LevelElement>();
+
+        // East
+        result.Add(w >= Width - 1 ? LevelElement.unknown : this[h][w + 1]);
+        // South
+        result.Add(h >= Height - 1 ? LevelElement.unknown : this[h + 1][w]);
+        // West
+        result.Add(w <= 0 ? LevelElement.unknown : this[h][w - 1]);
+        // North
+        result.Add(h <= 0 ? LevelElement.unknown : this[h - 1][w]);
+
+        return result.ToArray();
+    }
     #endregion
 }
 
@@ -329,7 +345,8 @@ public enum LevelElement
     BoxOnGoal    = (byte)'*',
     Goal         = (byte)'.',
     Floor        = (byte)' ',
-    Empty        = 0
+    Empty        = 0,
+    unknown      = -1
 }
 
 public class LevelLine : IEnumerable<LevelElement>

@@ -7,8 +7,8 @@ using UnityEngine.UI;
 public class LevelButtonPanel : MonoBehaviour {
 
     public GameObject levelButtonTemplate;
-    public Scrollbar selectorScrrollbar;
-    public static bool isInitialized;
+    public Scrollbar selectorScrollbar;
+    public ScrollRect selectorScrollRect;
 
     private GameManager gameManager;
 
@@ -16,10 +16,7 @@ public class LevelButtonPanel : MonoBehaviour {
     void Awake()
     {
         gameManager = GameManager.Instance;
-        //if (!isInitialized)
-            InitSelector();
-
-        //DontDestroyOnLoad(this);
+        InitSelector();
     }
 
     public void BackToMainMenu()
@@ -62,6 +59,7 @@ public class LevelButtonPanel : MonoBehaviour {
             level.LevelButton.transform.SetParent(transform, false);
         }
 
-        isInitialized = true;
+        selectorScrollbar.value = (float)gameManager.GameSettings.LastEnabledLevel / (float)gameManager.LevelCount;
+        selectorScrollRect.horizontalNormalizedPosition = (float)gameManager.GameSettings.LastEnabledLevel / (float)gameManager.LevelCount;
     }
 }

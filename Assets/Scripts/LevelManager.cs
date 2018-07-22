@@ -4,10 +4,13 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class LevelManager : MonoBehaviour {
 
     public static LevelManager Instance;
+
+    public Text FpsText;
 
     public Transform Walls;
     public Transform Floors;
@@ -50,37 +53,37 @@ public class LevelManager : MonoBehaviour {
     }
     public void BuildLevel()
     {
-        for (int z = 0; z < gameManager.CurrentLevel.Height; z++)
+        for (int h = 0; h < gameManager.CurrentLevel.Height; h++)
         {
-            for (int x = 0; x < gameManager.CurrentLevel.Width; x++)
+            for (int w = 0; w < gameManager.CurrentLevel.Width; w++)
             {
-                var element = gameManager.CurrentLevel[z][x];
+                var element = gameManager.CurrentLevel[h][w];
                 switch (element)
                 {
                     case LevelElement.Wall:
-                        CreateLevelObject(WallTemplate, Walls, z, x);
+                        CreateLevelObject(WallTemplate, Walls, h, w);
                         break;
                     case LevelElement.Player:
-                        CreateLevelObject(FloorTemplate, Floors, z, x);
-                        SetPlayer(z, x);
+                        CreateLevelObject(FloorTemplate, Floors, h, w);
+                        SetPlayer(h, w);
                         break;
                     case LevelElement.PlayerOnGoal:
-                        CreateLevelObject(GoalTemplate, Floors, z, x);
-                        SetPlayer(z, x);
+                        CreateLevelObject(GoalTemplate, Floors, h, w);
+                        SetPlayer(h, w);
                         break;
                     case LevelElement.Box:
-                        CreateLevelObject(FloorTemplate, Floors, z, x);
-                        CreateLevelObject(ChestTemplate, Chests, z, x);
+                        CreateLevelObject(FloorTemplate, Floors, h, w);
+                        CreateLevelObject(ChestTemplate, Chests, h, w);
                         break;
                     case LevelElement.BoxOnGoal:
-                        CreateLevelObject(GoalTemplate, Floors, z, x);
-                        CreateLevelObject(ChestTemplate, Chests, z, x);
+                        CreateLevelObject(GoalTemplate, Floors, h, w);
+                        CreateLevelObject(ChestTemplate, Chests, h, w);
                         break;
                     case LevelElement.Goal:
-                        CreateLevelObject(GoalTemplate, Floors, z, x);
+                        CreateLevelObject(GoalTemplate, Floors, h, w);
                         break;
                     case LevelElement.Floor:
-                        CreateLevelObject(FloorTemplate, Floors, z, x);
+                        CreateLevelObject(FloorTemplate, Floors, h, w);
                         break;
                 }
             }
@@ -95,11 +98,31 @@ public class LevelManager : MonoBehaviour {
     {
         Player.transform.position= new Vector3((float)x, Player.transform.position.y, (float)(gameManager.CurrentLevel.Height - z));
     }
-    private void CreateLevelObject(GameObject template, Transform parent, int z, int x)
+    private void CreateLevelObject(GameObject template, Transform parent, int h, int w)
     {
         Vector3 clonePosition = template.transform.position;
-        clonePosition = new Vector3((float)x, template.transform.position.y, (float)(gameManager.CurrentLevel.Height - z));
+        clonePosition = new Vector3((float)w, template.transform.position.y, (float)(gameManager.CurrentLevel.Height - h));
         GameObject clone = Instantiate(template, clonePosition, Quaternion.identity, parent);
+        if (clone.CompareTag("Wall"))
+        {
+            GameObject lampE = clone.transform.Find("NeonLighter_E").gameObject;
+            GameObject lampS = clone.transform.Find("NeonLighter_S").gameObject;
+            GameObject lampW = clone.transform.Find("NeonLighter_W").gameObject;
+            GameObject lampN = clone.transform.Find("NeonLighter_N").gameObject;
+            LevelElement[] neighbors = gameManager.CurrentLevel.GetNeighbors(h, w);
+            lampE.SetActive(neighbors[0] != LevelElement.Empty &&
+                            neighbors[0] != LevelElement.Wall &&
+                            neighbors[0] != LevelElement.unknown);
+            lampS.SetActive(neighbors[1] != LevelElement.Empty &&
+                            neighbors[1] != LevelElement.Wall &&
+                            neighbors[1] != LevelElement.unknown);
+            lampW.SetActive(neighbors[2] != LevelElement.Empty &&
+                            neighbors[2] != LevelElement.Wall &&
+                            neighbors[2] != LevelElement.unknown);
+            lampN.SetActive(neighbors[3] != LevelElement.Empty &&
+                            neighbors[3] != LevelElement.Wall &&
+                            neighbors[3] != LevelElement.unknown);
+        }
     }
 
     void Start()
@@ -140,6 +163,9 @@ public class LevelManager : MonoBehaviour {
             else
                 PauseGame();
         }
+
+        float fps = 1f / Time.deltaTime;
+        FpsText.text = Math.Ceiling(fps).ToString() + " FPS";
     }
 
     public void GoNextLevel()

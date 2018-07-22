@@ -10,6 +10,7 @@ TagManager:
   - Goal
   - LevelPanel
   - LevelButton
+  - Lighter
   layers:
   - Default
   - TransparentFX
