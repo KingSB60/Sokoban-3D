@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : INotifyPropertyChanged
 {
@@ -21,7 +22,7 @@ public class GameManager : INotifyPropertyChanged
 
     private GameManager()
     {
-        _GameSettings = new Settings();
+        GameSettings = new Settings();
         LoadLevels();
     }
 
@@ -51,10 +52,29 @@ public class GameManager : INotifyPropertyChanged
                 break;
             case "MasterVolume":
                 break;
+            case "LastResolvedLevel":
+                ResetLevelButtonLocks();
+                break;
         }
         OnPropertyChanged("Settings." + e.PropertyName);
     }
 
+    private void ResetLevelButtonLocks()
+    {
+        if (Levels == null)
+            return;
+
+        for (int i = 0; i < LevelCount; i++)
+        {
+            var level = Levels[i];
+            bool isEnabled = i <= GameSettings.LastResolvedLevel;
+            if (level.LevelButton == null)
+                continue;
+
+            level.LevelButton.transform.Find("LockPanel").gameObject.SetActive(!isEnabled);
+            level.LevelButton.GetComponent<Button>().interactable = isEnabled;
+        }
+    }
     internal int GetLevelIndex(Level level)
     {
         return Levels.GetLevelIndex(level);
@@ -116,7 +136,7 @@ public class GameManager : INotifyPropertyChanged
     }
     public void SetNextLevel()
     {
-        GameSettings.LastEnabledLevel = Levels.GetLevelIndex(Levels.NextLevelId);
+        GameSettings.LastResolvedLevel = Levels.GetLevelIndex(Levels.NextLevelId);
     }
 
     internal void NextLevel()

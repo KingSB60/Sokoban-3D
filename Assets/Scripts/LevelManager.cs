@@ -27,6 +27,7 @@ public class LevelManager : MonoBehaviour {
     private GameObject levelFinished;
     private GameObject levelPaused;
     private GameObject levelSelector;
+    private GameObject mainMenu;
 
     void Awake()
     {
@@ -132,6 +133,7 @@ public class LevelManager : MonoBehaviour {
         levelFinished = Utils.FindIncludingInactive("CompletedCanvas");
         levelPaused = Utils.FindIncludingInactive("PausedCanvas");
         levelSelector = Utils.FindIncludingInactive("LevelSelectorCanvas");
+        mainMenu = Utils.FindIncludingInactive("MainMEnuCanvas");
 
         //DontDestroyOnLoad(levelSelector);
 
@@ -197,12 +199,14 @@ public class LevelManager : MonoBehaviour {
     }
     public void AllLevelsFinished()
     {
-        SceneManager.LoadScene("GameMenu");
+        levelFinished.GetComponent<Canvas>().enabled = false;
+        mainMenu.GetComponent<Canvas>().enabled = true;
     }
     public void GoToMainMenu()
     {
         Pause(false);
-        SceneManager.LoadScene("GameMenu");
+        levelFinished.GetComponent<Canvas>().enabled = false;
+        mainMenu.GetComponent<Canvas>().enabled = true;
     }
     public void PauseGame()
     {

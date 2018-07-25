@@ -7,9 +7,9 @@ using UnityEngine.SceneManagement;
 
 public class LevelButton : MonoBehaviour
 {
-    public GameObject minimapCanvas;
-    public GameObject statusCanvas;
-    public GameObject selectorCanvas;
+    private GameObject minimapCanvas;
+    private GameObject statusCanvas;
+    private GameObject selectorCanvas;
 
     //public GameObject levelSelector;
     private GameManager gameManager;

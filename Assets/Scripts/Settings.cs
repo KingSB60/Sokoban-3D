@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -7,13 +8,14 @@ using UnityEngine;
 public class Settings : /*MonoBehaviour,*/ INotifyPropertyChanged
 {
     private static string levelPath_Key = "LevelPath";
+
     private static string levelFile_Key = "LevelFile";
     private static string musicOn_Key = "MusicOn";
     private static string musicVol_Key = "MusicVolume";
     private static string sfxOn_Key = "SFXOn";
     private static string sfxVol_Key = "SFXVolume";
     private static string masterVol_Key = "MasterVolume";
-    private static string lastEnabled_Key = "LastEnabledLevel";
+    private static string lastResolved_Key = "LastEnabledLevel";
 
     public event PropertyChangedEventHandler PropertyChanged;
     private void OnPropertyChanged(string propertyName)
@@ -38,8 +40,8 @@ public class Settings : /*MonoBehaviour,*/ INotifyPropertyChanged
             SFXVolume = 0.75f;
         if (!PlayerPrefs.HasKey(masterVol_Key))
             MasterVolume = 1.0f;
-        if (!PlayerPrefs.HasKey(lastEnabled_Key) || LastEnabledLevel < 1)
-            LastEnabledLevel = 1;
+        if (!PlayerPrefs.HasKey(lastResolved_Key) || LastResolvedLevel < 1)
+            LastResolvedLevel = 1;
     }
 
     public string LevelDirectory
@@ -136,20 +138,27 @@ public class Settings : /*MonoBehaviour,*/ INotifyPropertyChanged
             }
         }
     }
-    public int LastEnabledLevel
+    public int LastResolvedLevel
     {
-        get { return PlayerPrefs.GetInt(lastEnabled_Key); }
+        get { return PlayerPrefs.GetInt(lastResolved_Key); }
         set
         {
-            if (PlayerPrefs.GetInt(lastEnabled_Key) != value)
+            if (PlayerPrefs.GetInt(lastResolved_Key) != value)
             {
-                if (PlayerPrefs.GetInt(lastEnabled_Key) < value)
+                if (PlayerPrefs.GetInt(lastResolved_Key) < value)
                 {
-                    PlayerPrefs.SetInt(lastEnabled_Key, value);
+                    PlayerPrefs.SetInt(lastResolved_Key, value);
                     PlayerPrefs.Save();
-                    OnPropertyChanged("LastEnabledLevel");
+                    OnPropertyChanged("LastResolvedLevel");
                 }
             }
         }
+    }
+
+    internal void ResetLastResolvedLevel()
+    {
+        PlayerPrefs.SetInt(lastResolved_Key, 0);
+        PlayerPrefs.Save();
+        OnPropertyChanged("LastResolvedLevel");
     }
 }

@@ -23,9 +23,15 @@ public class SettingsMenue : MonoBehaviour
     private GameManager gameManager;
     private List<string> levelFiles;
 
+    private GameObject settingsCanvas;
+    private GameObject mainMenu;
+
     private void Awake()
     {
         gameManager = GameManager.Instance;
+
+        mainMenu = Utils.FindIncludingInactive("MainMenuCanvas");
+        settingsCanvas = Utils.FindIncludingInactive("GameSettingsCanvas");
 
         gameManager.GameSettings.PropertyChanged += GameSettings_PropertyChanged;
 
@@ -121,6 +127,8 @@ public class SettingsMenue : MonoBehaviour
 
     public void BackToMainMenu()
     {
-        SceneManager.LoadScene("GameMenu");
+        //SceneManager.LoadScene("GameMenu");
+        settingsCanvas.GetComponent<Canvas>().enabled = false;
+        mainMenu.GetComponent<Canvas>().enabled = true;
     }
 }

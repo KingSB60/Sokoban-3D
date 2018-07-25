@@ -10,18 +10,25 @@ public class LevelButtonPanel : MonoBehaviour {
     public Scrollbar selectorScrollbar;
     public ScrollRect selectorScrollRect;
 
+    private GameObject mainMenuCanvas;
+    private GameObject selectorCanvas;
+
     private GameManager gameManager;
 
     // Use this for initialization
     void Awake()
     {
         gameManager = GameManager.Instance;
+        mainMenuCanvas = Utils.FindIncludingInactive("MainMenuCanvas");
+        selectorCanvas = Utils.FindIncludingInactive("LevelSelectorCanvas");
+
         InitSelector();
     }
 
     public void BackToMainMenu()
     {
-        SceneManager.LoadScene("GameMenu");
+        selectorCanvas.GetComponent<Canvas>().enabled = false;
+        mainMenuCanvas.GetComponent<Canvas>().enabled = true;
     }
 
     public void InitSelector()
@@ -37,7 +44,7 @@ public class LevelButtonPanel : MonoBehaviour {
         for (int idx = 0; idx < gameManager.LevelCount; idx++)
         {
             var level = gameManager.Levels[idx];
-            bool isEnabled = gameManager.GetLevelIndex(level) <= gameManager.GameSettings.LastEnabledLevel;
+            bool isEnabled = gameManager.GetLevelIndex(level) <= gameManager.GameSettings.LastResolvedLevel;
 
             if (level.LevelButton == null)
             {
@@ -59,7 +66,7 @@ public class LevelButtonPanel : MonoBehaviour {
             level.LevelButton.transform.SetParent(transform, false);
         }
 
-        selectorScrollbar.value = (float)gameManager.GameSettings.LastEnabledLevel / (float)gameManager.LevelCount;
-        selectorScrollRect.horizontalNormalizedPosition = (float)gameManager.GameSettings.LastEnabledLevel / (float)gameManager.LevelCount;
+        selectorScrollbar.value = (float)gameManager.GameSettings.LastResolvedLevel / (float)gameManager.LevelCount;
+        selectorScrollRect.horizontalNormalizedPosition = (float)gameManager.GameSettings.LastResolvedLevel / (float)gameManager.LevelCount;
     }
 }
