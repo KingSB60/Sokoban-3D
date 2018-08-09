@@ -197,6 +197,7 @@ public class Level : IEnumerable<LevelLine>
 
     public int MoveCount { get; set; }
     public int PushCount { get; set; }
+    public int RotationCount { get; set; }
     public String History { get; set; }
 
     public GameObject LevelButton { get; set; }

@@ -10,32 +10,39 @@ public class LevelManager : MonoBehaviour {
 
     public static LevelManager Instance;
 
-    public Text FpsText;
-
+    [Header("LevelElementsContainer")]
     public Transform Walls;
     public Transform Floors;
     public Transform Chests;
-    public TextMeshProUGUI levelText;
 
-    public GameObject Player;
+    [Header("LevelElementsTemplates")]
     public GameObject WallTemplate;
     public GameObject FloorTemplate;
     public GameObject GoalTemplate;
     public GameObject ChestTemplate;
+    public GameObject Player;
+
+    [Header("CanvasObjects")]
+    public GameObject mainMenu;
+    public GameObject levelSelector;
+    public GameObject levelPaused;
+    public GameObject levelFinished;
+
+    [Header("HUD")]
+    public Text FpsText;
+    public TextMeshProUGUI levelText;
 
     private GameManager gameManager;
-    private GameObject levelFinished;
-    private GameObject levelPaused;
-    private GameObject levelSelector;
-    private GameObject mainMenu;
+
+    private Canvas mainMenuCanvas;
+    private Canvas levelSelectorCanvas;
+    private Canvas levelPausedCanvas;
+    private Canvas levelFinishedCanvas;
 
     void Awake()
     {
         gameManager = GameManager.Instance;
         Instance = this;
-        //ClearLevel();
-        ////level = GameManager.Instance.Levels.CurrentLevel;
-        //BuildLevel();
     }
 
     public void ClearLevel()
@@ -98,6 +105,8 @@ public class LevelManager : MonoBehaviour {
     private void SetPlayer(int z, int x)
     {
         Player.transform.position= new Vector3((float)x, Player.transform.position.y, (float)(gameManager.CurrentLevel.Height - z));
+        Player.transform.rotation = Quaternion.identity;
+        Player.GetComponent<PlayerController>().lookingTo = Directions.North;
     }
     private void CreateLevelObject(GameObject template, Transform parent, int h, int w)
     {
@@ -129,22 +138,10 @@ public class LevelManager : MonoBehaviour {
     void Start()
     {
         SetLevelText();
-        //var canvs = Resources.FindObjectsOfTypeAll<Canvas>();
-        levelFinished = Utils.FindIncludingInactive("CompletedCanvas");
-        levelPaused = Utils.FindIncludingInactive("PausedCanvas");
-        levelSelector = Utils.FindIncludingInactive("LevelSelectorCanvas");
-        mainMenu = Utils.FindIncludingInactive("MainMEnuCanvas");
-
-        //DontDestroyOnLoad(levelSelector);
-
-        //foreach (var canvas in canvs)
-        //{
-        //    if (canvas.gameObject.name == "CompletedCanvas")
-        //    {
-        //        levelFinished = canvas.gameObject;
-        //        break;
-        //    }
-        //}
+        mainMenuCanvas = mainMenu.GetComponent<Canvas>();
+        levelSelectorCanvas = levelSelector.GetComponent<Canvas>();
+        levelPausedCanvas = levelPaused.GetComponent<Canvas>();
+        levelFinishedCanvas = levelFinished.GetComponent<Canvas>();
     }
 
     private void Update()
@@ -181,40 +178,37 @@ public class LevelManager : MonoBehaviour {
             gameManager.NextLevel();
             gameManager.CurrentLevel.MoveCount = 0;
             gameManager.CurrentLevel.PushCount = 0;
+            gameManager.CurrentLevel.RotationCount = 0;
             gameManager.CurrentLevel.History = String.Empty;
             ClearLevel();
             BuildLevel();
             SetLevelText();
 
-            levelFinished.GetComponent<Canvas>().enabled = false;
+            showMenuCanvas(null);
             gameManager.CurrentLevel.StartTime = DateTime.Now;
         }
     }
     public void GoToLevelSelect()
     {
-        //SceneManager.LoadScene("LevelSelector");
-        Pause(false);
-        levelFinished.GetComponent<Canvas>().enabled = false;
-        levelSelector.GetComponent<Canvas>().enabled = true;
+        showMenuCanvas(levelSelectorCanvas);
     }
     public void AllLevelsFinished()
     {
-        levelFinished.GetComponent<Canvas>().enabled = false;
-        mainMenu.GetComponent<Canvas>().enabled = true;
+        showMenuCanvas(mainMenuCanvas);
     }
     public void GoToMainMenu()
     {
-        Pause(false);
-        levelFinished.GetComponent<Canvas>().enabled = false;
-        mainMenu.GetComponent<Canvas>().enabled = true;
+        showMenuCanvas(mainMenuCanvas);
     }
     public void PauseGame()
     {
         Pause(true);
+        showMenuCanvas(levelPausedCanvas);
     }
     public void ContinueGame()
     {
         Pause(false);
+        showMenuCanvas(null);
     }
     public void RestartLevel()
     {
@@ -231,24 +225,40 @@ public class LevelManager : MonoBehaviour {
                         SetPlayer(z, x);
                         break;
                     case LevelElement.Box:
-                        var chest = Chests.transform.GetChild(boxCount);
-                        chest.position = new Vector3((float)(x), chest.position.y, (float)(gameManager.CurrentLevel.Height - z));
-                        boxCount++;
+                    case LevelElement.BoxOnGoal:
+                        if (boxCount < Chests.transform.childCount)
+                        {
+                            var chest = Chests.transform.GetChild(boxCount);
+                            chest.position = new Vector3((float)(x), chest.position.y, (float)(gameManager.CurrentLevel.Height - z));
+                            boxCount++;
+                        }
                         break;
                     default:
                         break;
                 }
             }
 
-        Pause(false);
+        //Pause(false);
+        showMenuCanvas(null);
         gameManager.CurrentLevel.MoveCount = 0;
         gameManager.CurrentLevel.PushCount = 0;
+        gameManager.CurrentLevel.RotationCount = 0;
         gameManager.CurrentLevel.StartTime = DateTime.Now;
     }
 
-    private void Pause(bool value)
+    private void showMenuCanvas(Canvas menu)
+    {
+        mainMenuCanvas.enabled = false;
+        levelSelectorCanvas.enabled = false;
+        levelPausedCanvas.enabled = false;
+        levelFinishedCanvas.enabled = false;
+
+        if (menu != null)
+            menu.enabled = true;
+    }
+
+    public void Pause(bool value)
     {
         gameManager.CurrentLevel.LevelPaused = value;
-        levelPaused.GetComponent<Canvas>().enabled = value;
     }
 }

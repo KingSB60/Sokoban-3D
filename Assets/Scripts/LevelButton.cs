@@ -43,6 +43,7 @@ public class LevelButton : MonoBehaviour
 
         gameManager.CurrentLevel.MoveCount = 0;
         gameManager.CurrentLevel.PushCount = 0;
+        gameManager.CurrentLevel.RotationCount = 0;
         gameManager.CurrentLevel.StartTime = DateTime.Now;
         //SceneManager.LoadScene("LevelScene", LoadSceneMode.Single);
         //Transform parent = transform.parent;

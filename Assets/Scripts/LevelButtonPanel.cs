@@ -10,25 +10,13 @@ public class LevelButtonPanel : MonoBehaviour {
     public Scrollbar selectorScrollbar;
     public ScrollRect selectorScrollRect;
 
-    private GameObject mainMenuCanvas;
-    private GameObject selectorCanvas;
-
     private GameManager gameManager;
 
     // Use this for initialization
     void Awake()
     {
         gameManager = GameManager.Instance;
-        mainMenuCanvas = Utils.FindIncludingInactive("MainMenuCanvas");
-        selectorCanvas = Utils.FindIncludingInactive("LevelSelectorCanvas");
-
         InitSelector();
-    }
-
-    public void BackToMainMenu()
-    {
-        selectorCanvas.GetComponent<Canvas>().enabled = false;
-        mainMenuCanvas.GetComponent<Canvas>().enabled = true;
     }
 
     public void InitSelector()

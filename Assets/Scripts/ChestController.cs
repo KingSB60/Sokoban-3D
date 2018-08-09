@@ -13,8 +13,8 @@ public class ChestController : MonoBehaviour {
     public Material glowMaterial;
 
     private float speed;
-    private Vector3 movingDestination, lastPosition;
-    private bool moving;
+    //private Vector3 movingDestination, lastPosition;
+    //private bool moving;
     private bool _destinationIsGoal;//, destinationWasGoal;
     private PlayerController playerScript;
     //private GameObject indicatorInstance;
@@ -42,7 +42,7 @@ public class ChestController : MonoBehaviour {
     // Use this for initialization
     void Start ()
     {
-        moving = false;
+        //moving = false;
         DestinationIsGoal = false;
         levelCompleted = Utils.FindIncludingInactive("CompletedCanvas");
 
@@ -56,11 +56,11 @@ public class ChestController : MonoBehaviour {
 
     void LateUpdate ()
     {
-        if (moving)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, movingDestination, speed * Time.deltaTime);
-            moving = !transform.position.Equals(movingDestination);
-        }
+        //if (moving)
+        //{
+        //    transform.position = Vector3.MoveTowards(transform.position, movingDestination, speed * Time.deltaTime);
+        //    moving = !transform.position.Equals(movingDestination);
+        //}
     }
 
     private void OnTriggerEnter(Collider other)
@@ -76,13 +76,17 @@ public class ChestController : MonoBehaviour {
                 //Debug.Log("touched by Player!");
                 playerScript = whoTouchedMe.GetComponent<PlayerController>();
 
-                speed = playerScript.speed;
+                //speed = playerScript.speed;
                 var movingDirection = playerScript.moveDirection;
-                movingDestination = transform.position + movingDirection;
-                lastPosition = transform.position;
+                //movingDestination = transform.position + movingDirection;
+                //lastPosition = transform.position;
 
-                moving = true;
+                //moving = true;
+                playerScript.StartPushing();
                 playerScript.PushCount++;
+
+                transform.parent = whoTouchedMe.transform;
+                transform.position = whoTouchedMe.transform.position + movingDirection;
                 break;
             case "Floor":
                 SetIsGoal(false);
@@ -92,11 +96,11 @@ public class ChestController : MonoBehaviour {
                 break;
             case "Wall":
             case "Chest":
-                if (moving)
-                {
-                    movingDestination = lastPosition;
+                //if (moving)
+                //{
+                //    movingDestination = lastPosition;
                     playerScript.MoveBack(true);
-                }
+                //}
                 break;
         }
     }
